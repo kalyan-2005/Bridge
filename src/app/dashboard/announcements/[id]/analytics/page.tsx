@@ -4,9 +4,23 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { requireAuthor } from "@/lib/auth-guard";
 import { getAnnouncementAnalytics } from "@/actions/announcement-actions";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type Props = { params: { id: string } };
 
@@ -33,7 +47,9 @@ export default async function AnnouncementAnalyticsPage({ params }: Props) {
     <div className="space-y-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-2">
-          <h1 className="font-display text-3xl font-semibold tracking-tight">Analytics</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight">
+            Analytics
+          </h1>
           <p className="max-w-2xl text-sm text-muted-foreground">{a.title}</p>
         </div>
         <div className="flex gap-2">
@@ -63,14 +79,18 @@ export default async function AnnouncementAnalyticsPage({ params }: Props) {
         <Card className="border-border/70 bg-card/50">
           <CardHeader className="pb-2">
             <CardDescription>Pending (employees)</CardDescription>
-            <CardTitle className="text-3xl">{a.pendingAcknowledgments}</CardTitle>
+            <CardTitle className="text-3xl">
+              {a.pendingAcknowledgments}
+            </CardTitle>
           </CardHeader>
         </Card>
         <Card className="border-border/70 bg-card/50">
           <CardHeader className="pb-2">
             <CardDescription>Acknowledgment rate</CardDescription>
             <CardTitle className="text-3xl">
-              {a.acknowledgmentPercent != null ? `${a.acknowledgmentPercent}%` : "—"}
+              {a.acknowledgmentPercent != null
+                ? `${a.acknowledgmentPercent}%`
+                : "—"}
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
@@ -82,17 +102,26 @@ export default async function AnnouncementAnalyticsPage({ params }: Props) {
       <Card className="border-border/70 bg-card/50">
         <CardHeader>
           <CardTitle>Employees who have not acknowledged</CardTitle>
-          <CardDescription>Only users with the EMPLOYEE role are counted toward pending totals.</CardDescription>
+          <CardDescription>
+            Only users with the EMPLOYEE role are counted toward pending totals.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {a.pendingEmployees.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Everyone has acknowledged — or acknowledgment was not required.</p>
+            <p className="text-sm text-muted-foreground">
+              Everyone has acknowledged — or acknowledgment was not required.
+            </p>
           ) : (
             <ul className="divide-y divide-border/60 rounded-lg border border-border/60">
               {a.pendingEmployees.map((u) => (
-                <li key={u.id} className="flex items-center justify-between px-3 py-2 text-sm">
+                <li
+                  key={u.id}
+                  className="flex items-center justify-between px-3 py-2 text-sm"
+                >
                   <span>{u.name ?? u.email}</span>
-                  <span className="text-xs text-muted-foreground">{u.email}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {u.email}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -100,9 +129,53 @@ export default async function AnnouncementAnalyticsPage({ params }: Props) {
         </CardContent>
       </Card>
 
+      <Card className="border-border/70 bg-card/50">
+        <CardHeader>
+          <CardTitle>Employees who have read</CardTitle>
+          <CardDescription>
+            Employees who opened this announcement and when it was read.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {a.readEmployees.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No reads have been recorded yet.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Read at</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {a.readEmployees.map((read) => (
+                    <TableRow key={`${read.id}-${read.readAt.toISOString()}`}>
+                      <TableCell>{read.name ?? read.email}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {read.email}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {new Date(read.readAt).toLocaleString()}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <Separator />
       <p className="text-sm text-muted-foreground">
-        <Link href="/dashboard/author" className="text-primary underline-offset-4 hover:underline">
+        <Link
+          href="/dashboard/author"
+          className="text-primary underline-offset-4 hover:underline"
+        >
           Back to author workspace
         </Link>
       </p>
