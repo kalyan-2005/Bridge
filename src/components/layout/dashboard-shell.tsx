@@ -105,7 +105,7 @@ export function DashboardShell({
             <p className="truncate text-xs text-sidebar-foreground/60">{title}</p>
           </div>
         </div>
-        <p className="mt-4 text-xs leading-relaxed text-sidebar-foreground/65">{subtitle}</p>
+        {/* <p className="mt-4 text-xs leading-relaxed text-sidebar-foreground/65">{subtitle}</p> */}
       </div>
       <Separator className="bg-sidebar-border" />
       <div className="flex-1 overflow-y-auto px-3 py-4">
