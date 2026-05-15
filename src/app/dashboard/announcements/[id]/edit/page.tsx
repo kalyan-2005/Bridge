@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 import { AnnouncementStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireAuthor } from "@/lib/auth-guard";
-import { AnnouncementAuthorControls } from "@/components/announcements/announcement-author-controls";
 import { AnnouncementForm } from "@/components/announcements/announcement-form";
 
 type Props = { params: { id: string } };
@@ -41,13 +40,8 @@ export default async function EditAnnouncementPage({ params }: Props) {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <h1 className="font-display text-3xl font-semibold tracking-tight">
-          Edit draft
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Publishing will lock title, body, category, pin, and acknowledgment
-          settings.
-        </p>
+        <h1 className="font-display text-3xl font-semibold tracking-tight">Edit draft</h1>
+        <p className="text-sm text-muted-foreground">Publishing will lock title, body, category, pin, and acknowledgment settings.</p>
       </div>
       <div className="max-w-3xl rounded-xl border border-border/70 bg-card/40 p-6 shadow-sm backdrop-blur">
         <AnnouncementForm
@@ -60,29 +54,12 @@ export default async function EditAnnouncementPage({ params }: Props) {
             requiresAcknowledgment: row.requiresAcknowledgment,
           }}
         />
-
-        <div className="mt-6 rounded-xl border border-border/70 bg-muted/10 p-4">
-          <p className="mb-3 text-sm font-medium text-muted-foreground">
-            Draft actions
-          </p>
-          <AnnouncementAuthorControls
-            announcementId={row.id}
-            status={row.status}
-          />
-        </div>
-
         <p className="mt-6 text-sm text-muted-foreground">
-          <Link
-            href={`/dashboard/announcements/${row.id}`}
-            className="text-primary underline-offset-4 hover:underline"
-          >
+          <Link href={`/dashboard/announcements/${row.id}`} className="text-primary underline-offset-4 hover:underline">
             Preview detail
           </Link>
           {" · "}
-          <Link
-            href="/dashboard/author"
-            className="text-primary underline-offset-4 hover:underline"
-          >
+          <Link href="/dashboard/author" className="text-primary underline-offset-4 hover:underline">
             Author workspace
           </Link>
         </p>

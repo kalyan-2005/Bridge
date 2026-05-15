@@ -13,21 +13,17 @@ const idSchema = z.string().cuid();
 async function getSessionOrError() {
   const session = await auth();
   if (!session?.user) return { ok: false as const, error: "Unauthorized" };
-  if (session.user.isSuspended)
-    return { ok: false as const, error: "Suspended" };
+  if (session.user.isSuspended) return { ok: false as const, error: "Suspended" };
   return { ok: true as const, session };
 }
 
-export async function createAnnouncement(
-  input: unknown,
-): Promise<ActionResult<{ id: string }>> {
+export async function createAnnouncement(input: unknown): Promise<ActionResult<{ id: string }>> {
   const gate = await getSessionOrError();
   if (!gate.ok) return actionError(gate.error);
   if (gate.session.user.role !== Role.AUTHOR) return actionError("Forbidden");
 
   const parsed = announcementDraftUpsertSchema.safeParse(input);
-  if (!parsed.success)
-    return actionError(parsed.error.errors[0]?.message ?? "Invalid input");
+  if (!parsed.success) return actionError(parsed.error.errors[0]?.message ?? "Invalid input");
 
   try {
     const row = await prisma.announcement.create({
@@ -51,9 +47,7 @@ export async function createAnnouncement(
   }
 }
 
-export async function updateAnnouncementDraft(
-  input: unknown,
-): Promise<ActionResult> {
+export async function updateAnnouncementDraft(input: unknown): Promise<ActionResult> {
   const gate = await getSessionOrError();
   if (!gate.ok) return actionError(gate.error);
   if (gate.session.user.role !== Role.AUTHOR) return actionError("Forbidden");
@@ -63,8 +57,7 @@ export async function updateAnnouncementDraft(
     data: announcementDraftUpsertSchema,
   });
   const parsed = schema.safeParse(input);
-  if (!parsed.success)
-    return actionError(parsed.error.errors[0]?.message ?? "Invalid input");
+  if (!parsed.success) return actionError(parsed.error.errors[0]?.message ?? "Invalid input");
 
   try {
     const existing = await prisma.announcement.findUnique({
@@ -72,10 +65,8 @@ export async function updateAnnouncementDraft(
       select: { authorId: true, status: true },
     });
     if (!existing) return actionError("Not found");
-    if (existing.authorId !== gate.session.user.id)
-      return actionError("Forbidden");
-    if (existing.status !== AnnouncementStatus.DRAFT)
-      return actionError("Only drafts can be edited");
+    if (existing.authorId !== gate.session.user.id) return actionError("Forbidden");
+    if (existing.status !== AnnouncementStatus.DRAFT) return actionError("Only drafts can be edited");
 
     await prisma.announcement.update({
       where: { id: parsed.data.id },
@@ -97,9 +88,7 @@ export async function updateAnnouncementDraft(
   }
 }
 
-export async function deleteAnnouncementDraft(
-  input: unknown,
-): Promise<ActionResult> {
+export async function deleteAnnouncementDraft(input: unknown): Promise<ActionResult> {
   const gate = await getSessionOrError();
   if (!gate.ok) return actionError(gate.error);
   if (gate.session.user.role !== Role.AUTHOR) return actionError("Forbidden");
@@ -113,10 +102,8 @@ export async function deleteAnnouncementDraft(
       select: { authorId: true, status: true },
     });
     if (!existing) return actionError("Not found");
-    if (existing.authorId !== gate.session.user.id)
-      return actionError("Forbidden");
-    if (existing.status !== AnnouncementStatus.DRAFT)
-      return actionError("Only drafts can be deleted");
+    if (existing.authorId !== gate.session.user.id) return actionError("Forbidden");
+    if (existing.status !== AnnouncementStatus.DRAFT) return actionError("Only drafts can be deleted");
 
     await prisma.announcement.delete({ where: { id: parsed.data.id } });
     revalidatePath("/dashboard/announcements");
@@ -128,9 +115,7 @@ export async function deleteAnnouncementDraft(
   }
 }
 
-export async function publishAnnouncement(
-  input: unknown,
-): Promise<ActionResult> {
+export async function publishAnnouncement(input: unknown): Promise<ActionResult> {
   const gate = await getSessionOrError();
   if (!gate.ok) return actionError(gate.error);
   if (gate.session.user.role !== Role.AUTHOR) return actionError("Forbidden");
@@ -144,10 +129,8 @@ export async function publishAnnouncement(
       select: { authorId: true, status: true, publishedAt: true },
     });
     if (!existing) return actionError("Not found");
-    if (existing.authorId !== gate.session.user.id)
-      return actionError("Forbidden");
-    if (existing.status !== AnnouncementStatus.DRAFT)
-      return actionError("Only drafts can be published");
+    if (existing.authorId !== gate.session.user.id) return actionError("Forbidden");
+    if (existing.status !== AnnouncementStatus.DRAFT) return actionError("Only drafts can be published");
 
     await prisma.announcement.update({
       where: { id: parsed.data.id },
@@ -166,9 +149,7 @@ export async function publishAnnouncement(
   }
 }
 
-export async function archiveAnnouncement(
-  input: unknown,
-): Promise<ActionResult> {
+export async function archiveAnnouncement(input: unknown): Promise<ActionResult> {
   const gate = await getSessionOrError();
   if (!gate.ok) return actionError(gate.error);
   if (gate.session.user.role !== Role.AUTHOR) return actionError("Forbidden");
@@ -182,10 +163,8 @@ export async function archiveAnnouncement(
       select: { authorId: true, status: true },
     });
     if (!existing) return actionError("Not found");
-    if (existing.authorId !== gate.session.user.id)
-      return actionError("Forbidden");
-    if (existing.status !== AnnouncementStatus.PUBLISHED)
-      return actionError("Only published posts can be archived");
+    if (existing.authorId !== gate.session.user.id) return actionError("Forbidden");
+    if (existing.status !== AnnouncementStatus.PUBLISHED) return actionError("Only published posts can be archived");
 
     await prisma.announcement.update({
       where: { id: parsed.data.id },
@@ -201,9 +180,7 @@ export async function archiveAnnouncement(
   }
 }
 
-export async function markAnnouncementRead(
-  input: unknown,
-): Promise<ActionResult> {
+export async function markAnnouncementRead(input: unknown): Promise<ActionResult> {
   const gate = await getSessionOrError();
   if (!gate.ok) return actionError(gate.error);
 
@@ -218,13 +195,9 @@ export async function markAnnouncementRead(
     if (!row) return actionError("Not found");
 
     const isAuthor = row.authorId === gate.session.user.id;
-    if (row.status === AnnouncementStatus.DRAFT && !isAuthor)
-      return actionError("Forbidden");
+    if (row.status === AnnouncementStatus.DRAFT && !isAuthor) return actionError("Forbidden");
     if (row.status === AnnouncementStatus.DRAFT) return actionSuccess();
-    if (
-      row.status !== AnnouncementStatus.PUBLISHED &&
-      row.status !== AnnouncementStatus.ARCHIVED
-    ) {
+    if (row.status !== AnnouncementStatus.PUBLISHED && row.status !== AnnouncementStatus.ARCHIVED) {
       return actionError("Forbidden");
     }
 
@@ -251,9 +224,7 @@ export async function markAnnouncementRead(
   }
 }
 
-export async function acknowledgeAnnouncement(
-  input: unknown,
-): Promise<ActionResult> {
+export async function acknowledgeAnnouncement(input: unknown): Promise<ActionResult> {
   const gate = await getSessionOrError();
   if (!gate.ok) return actionError(gate.error);
 
@@ -270,10 +241,8 @@ export async function acknowledgeAnnouncement(
       },
     });
     if (!row) return actionError("Not found");
-    if (row.status !== AnnouncementStatus.PUBLISHED)
-      return actionError("Acknowledgment is only available on published posts");
-    if (!row.requiresAcknowledgment)
-      return actionError("This post does not require acknowledgment");
+    if (row.status !== AnnouncementStatus.PUBLISHED) return actionError("Acknowledgment is only available on published posts");
+    if (!row.requiresAcknowledgment) return actionError("This post does not require acknowledgment");
 
     await prisma.announcementAcknowledgment.upsert({
       where: {
@@ -307,12 +276,6 @@ export type AnnouncementAnalyticsDTO = {
   pendingAcknowledgments: number;
   acknowledgmentPercent: number | null;
   pendingEmployees: { id: string; name: string | null; email: string }[];
-  readEmployees: {
-    id: string;
-    name: string | null;
-    email: string;
-    readAt: Date;
-  }[];
 };
 
 export async function getAnnouncementAnalytics(
@@ -332,33 +295,14 @@ export async function getAnnouncementAnalytics(
       title: true,
       authorId: true,
       requiresAcknowledgment: true,
-      reads: {
-        where: { user: { role: Role.EMPLOYEE } },
-        select: {
-          readAt: true,
-          user: { select: { id: true, name: true, email: true } },
-        },
-        orderBy: { readAt: "desc" },
-      },
     },
   });
   if (!announcement) return actionError("Not found");
-  if (announcement.authorId !== gate.session.user.id)
-    return actionError("Forbidden");
+  if (announcement.authorId !== gate.session.user.id) return actionError("Forbidden");
 
-  const [
-    totalReads,
-    totalAcknowledgments,
-    employees,
-    ackUserIds,
-    employeeAckCount,
-  ] = await prisma.$transaction([
-    prisma.announcementRead.count({
-      where: { announcementId: announcement.id },
-    }),
-    prisma.announcementAcknowledgment.count({
-      where: { announcementId: announcement.id },
-    }),
+  const [totalReads, totalAcknowledgments, employees, ackUserIds, employeeAckCount] = await prisma.$transaction([
+    prisma.announcementRead.count({ where: { announcementId: announcement.id } }),
+    prisma.announcementAcknowledgment.count({ where: { announcementId: announcement.id } }),
     prisma.user.findMany({
       where: { role: Role.EMPLOYEE, isSuspended: false },
       select: { id: true, name: true, email: true },
@@ -378,20 +322,11 @@ export async function getAnnouncementAnalytics(
   const ackSet = new Set(ackUserIds.map((a) => a.userId));
   const pendingEmployees = employees.filter((u) => !ackSet.has(u.id));
   const employeeCount = employees.length;
-  const pendingAcknowledgments = announcement.requiresAcknowledgment
-    ? pendingEmployees.length
-    : 0;
+  const pendingAcknowledgments = announcement.requiresAcknowledgment ? pendingEmployees.length : 0;
   const acknowledgmentPercent =
     announcement.requiresAcknowledgment && employeeCount > 0
       ? Math.round((employeeAckCount / employeeCount) * 1000) / 10
       : null;
-
-  const readEmployees = announcement.reads.map((read) => ({
-    id: read.user.id,
-    name: read.user.name,
-    email: read.user.email,
-    readAt: read.readAt,
-  }));
 
   return actionSuccess({
     announcementId: announcement.id,
@@ -402,6 +337,5 @@ export async function getAnnouncementAnalytics(
     pendingAcknowledgments,
     acknowledgmentPercent,
     pendingEmployees,
-    readEmployees,
   });
 }

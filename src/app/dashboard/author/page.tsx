@@ -4,16 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { requireAuthor } from "@/lib/auth-guard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CATEGORY_LABEL, STATUS_LABEL } from "@/lib/announcement-meta";
-import { PublishDraftButton } from "@/components/announcements/publish-draft-button";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -30,18 +22,9 @@ export default async function AuthorWorkspacePage() {
       select: { id: true, title: true, category: true, updatedAt: true },
     }),
     prisma.announcement.findMany({
-      where: {
-        authorId: session.user.id,
-        status: AnnouncementStatus.PUBLISHED,
-      },
+      where: { authorId: session.user.id, status: AnnouncementStatus.PUBLISHED },
       orderBy: [{ pinned: "desc" }, { publishedAt: "desc" }],
-      select: {
-        id: true,
-        title: true,
-        category: true,
-        pinned: true,
-        publishedAt: true,
-      },
+      select: { id: true, title: true, category: true, pinned: true, publishedAt: true },
     }),
     prisma.announcement.findMany({
       where: { authorId: session.user.id, status: AnnouncementStatus.ARCHIVED },
@@ -54,12 +37,9 @@ export default async function AuthorWorkspacePage() {
     <div className="space-y-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-2">
-          <h1 className="font-display text-3xl font-semibold tracking-tight">
-            Author workspace
-          </h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight">Author workspace</h1>
           <p className="max-w-2xl text-sm text-muted-foreground">
-            Drafts stay private until you publish. Published content can only be
-            archived — never silently edited.
+            Drafts stay private until you publish. Published content can only be archived — never silently edited.
           </p>
         </div>
         <Button asChild>
@@ -82,10 +62,7 @@ export default async function AuthorWorkspacePage() {
             <TableBody>
               {drafts.length === 0 ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={4}
-                    className="py-8 text-center text-sm text-muted-foreground"
-                  >
+                  <TableCell colSpan={4} className="py-8 text-center text-sm text-muted-foreground">
                     No drafts yet.
                   </TableCell>
                 </TableRow>
@@ -94,22 +71,15 @@ export default async function AuthorWorkspacePage() {
                   <TableRow key={d.id}>
                     <TableCell className="font-medium">{d.title}</TableCell>
                     <TableCell className="hidden sm:table-cell">
-                      <Badge variant="outline">
-                        {CATEGORY_LABEL[d.category]}
-                      </Badge>
+                      <Badge variant="outline">{CATEGORY_LABEL[d.category]}</Badge>
                     </TableCell>
                     <TableCell className="hidden text-sm text-muted-foreground md:table-cell">
                       {new Date(d.updatedAt).toLocaleString()}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-3">
-                        <Button variant="link" asChild className="h-auto p-0">
-                          <Link href={`/dashboard/announcements/${d.id}/edit`}>
-                            Edit
-                          </Link>
-                        </Button>
-                        <PublishDraftButton announcementId={d.id} />
-                      </div>
+                      <Button variant="link" asChild className="h-auto p-0">
+                        <Link href={`/dashboard/announcements/${d.id}/edit`}>Edit</Link>
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
@@ -127,19 +97,14 @@ export default async function AuthorWorkspacePage() {
               <TableRow>
                 <TableHead>Title</TableHead>
                 <TableHead className="hidden sm:table-cell">Category</TableHead>
-                <TableHead className="hidden md:table-cell">
-                  Published
-                </TableHead>
+                <TableHead className="hidden md:table-cell">Published</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {published.length === 0 ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={4}
-                    className="py-8 text-center text-sm text-muted-foreground"
-                  >
+                  <TableCell colSpan={4} className="py-8 text-center text-sm text-muted-foreground">
                     Nothing published yet.
                   </TableCell>
                 </TableRow>
@@ -149,34 +114,22 @@ export default async function AuthorWorkspacePage() {
                     <TableCell>
                       <div className="flex flex-col gap-1">
                         <span className="font-medium">{p.title}</span>
-                        {p.pinned ? (
-                          <Badge className="w-fit text-xs">Pinned</Badge>
-                        ) : null}
+                        {p.pinned ? <Badge className="w-fit text-xs">Pinned</Badge> : null}
                       </div>
                     </TableCell>
                     <TableCell className="hidden sm:table-cell">
-                      <Badge variant="outline">
-                        {CATEGORY_LABEL[p.category]}
-                      </Badge>
+                      <Badge variant="outline">{CATEGORY_LABEL[p.category]}</Badge>
                     </TableCell>
                     <TableCell className="hidden text-sm text-muted-foreground md:table-cell">
-                      {p.publishedAt
-                        ? new Date(p.publishedAt).toLocaleString()
-                        : "—"}
+                      {p.publishedAt ? new Date(p.publishedAt).toLocaleString() : "—"}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-3">
                         <Button variant="link" asChild className="h-auto p-0">
-                          <Link href={`/dashboard/announcements/${p.id}`}>
-                            View
-                          </Link>
+                          <Link href={`/dashboard/announcements/${p.id}`}>View</Link>
                         </Button>
                         <Button variant="link" asChild className="h-auto p-0">
-                          <Link
-                            href={`/dashboard/announcements/${p.id}/analytics`}
-                          >
-                            Analytics
-                          </Link>
+                          <Link href={`/dashboard/announcements/${p.id}/analytics`}>Analytics</Link>
                         </Button>
                       </div>
                     </TableCell>
@@ -196,19 +149,14 @@ export default async function AuthorWorkspacePage() {
               <TableRow>
                 <TableHead>Title</TableHead>
                 <TableHead className="hidden sm:table-cell">Category</TableHead>
-                <TableHead className="hidden md:table-cell">
-                  Originally published
-                </TableHead>
+                <TableHead className="hidden md:table-cell">Originally published</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {archived.length === 0 ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={4}
-                    className="py-8 text-center text-sm text-muted-foreground"
-                  >
+                  <TableCell colSpan={4} className="py-8 text-center text-sm text-muted-foreground">
                     No archived announcements.
                   </TableCell>
                 </TableRow>
@@ -217,28 +165,18 @@ export default async function AuthorWorkspacePage() {
                   <TableRow key={a.id}>
                     <TableCell className="font-medium">{a.title}</TableCell>
                     <TableCell className="hidden sm:table-cell">
-                      <Badge variant="outline">
-                        {CATEGORY_LABEL[a.category]}
-                      </Badge>
+                      <Badge variant="outline">{CATEGORY_LABEL[a.category]}</Badge>
                     </TableCell>
                     <TableCell className="hidden text-sm text-muted-foreground md:table-cell">
-                      {a.publishedAt
-                        ? new Date(a.publishedAt).toLocaleString()
-                        : "—"}
+                      {a.publishedAt ? new Date(a.publishedAt).toLocaleString() : "—"}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-3">
                         <Button variant="link" asChild className="h-auto p-0">
-                          <Link href={`/dashboard/announcements/${a.id}`}>
-                            View
-                          </Link>
+                          <Link href={`/dashboard/announcements/${a.id}`}>View</Link>
                         </Button>
                         <Button variant="link" asChild className="h-auto p-0">
-                          <Link
-                            href={`/dashboard/announcements/${a.id}/analytics`}
-                          >
-                            Analytics
-                          </Link>
+                          <Link href={`/dashboard/announcements/${a.id}/analytics`}>Analytics</Link>
                         </Button>
                       </div>
                     </TableCell>
