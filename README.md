@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # PalTech Forge — AI-assisted hackathon starter
 
 Production-grade Next.js starter focused on **fast pivots**: secure authentication, RBAC, operational dashboards, audit primitives, and modular “business surfaces” you can replace once the real problem statement arrives.
@@ -150,3 +151,8 @@ This template is designed for **human + AI pair programming**:
 ## License
 
 Private hackathon template (adjust as needed).
+=======
+# NotifyBridge
+Internal Announcement and Communication Portal
+>>>>>>> b6501fb08c3e8bd2149af79846e51fa19c414269
+# Bridge
