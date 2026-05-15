@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { AnnouncementAcknowledgeButton } from "@/components/announcements/announcement-ack-button";
 import { AnnouncementAuthorControls } from "@/components/announcements/announcement-author-controls";
 import { CATEGORY_LABEL, STATUS_LABEL } from "@/lib/announcement-meta";
-
+// dummy
 type Props = { params: { id: string } };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
